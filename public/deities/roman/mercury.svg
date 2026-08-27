@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 760">
+<defs>
+  <radialGradient id="bg" cx="50%" cy="22%"><stop offset="0" stop-color="#fff8d9"/><stop offset=".35" stop-color="#efe2bd"/><stop offset="1" stop-color="#d9c39a"/></radialGradient>
+  <linearGradient id="robe" x1="0" x2="1"><stop stop-color="#9fb68f"/><stop offset=".5" stop-color="#efe5cd"/><stop offset="1" stop-color="#9fb68f"/></linearGradient>
+</defs>
+<rect width="600" height="760" fill="url(#bg)"/>
+<circle cx="300" cy="210" r="145" fill="none" stroke="#b98a36" stroke-width="2" opacity=".55"/>
+<circle cx="300" cy="210" r="112" fill="#f7efdc" stroke="#c6a45d" stroke-width="3"/>
+<path d="M245 245 Q300 205 355 245 M300 180 V365 M274 210 Q330 225 274 260 M326 210 Q270 225 326 260" fill="none" stroke="#9d7631" stroke-width="7" stroke-linecap="round"/>
+<circle cx="300" cy="205" r="62" fill="#e6cfad"/>
+<path d="M252 205 Q300 150 348 205 Q335 275 300 284 Q265 275 252 205Z" fill="#cfae83"/>
+<path d="M205 610 Q225 330 300 300 Q375 330 395 610 Z" fill="url(#robe)" stroke="#9f7a3c" stroke-width="4"/>
+<path d="M230 415 Q300 465 370 415" fill="none" stroke="#a47b36" stroke-width="5" opacity=".7"/>
+<circle cx="300" cy="530" r="62" fill="none" stroke="#b78c3c" stroke-width="3" opacity=".6"/>
+<text x="300" y="558" text-anchor="middle" font-family="Georgia, serif" font-size="86" fill="#8b6429">☿</text>
+<path d="M140 655 Q300 600 460 655" fill="none" stroke="#b99552" stroke-width="3"/>
+<path d="M175 680 Q300 625 425 680" fill="none" stroke="#b99552" stroke-width="2" opacity=".65"/>
+</svg>
