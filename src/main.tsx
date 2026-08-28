@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import ReactDOM from 'react-dom/client'
 import { SwissEphemeris, Planet, HouseSystem } from '@swisseph/browser'
 import './styles.css'
-import olympusOriginalPanel from './assets/deities/olympus-original-panel-v2.png'
+import olympusOriginalPanel from './assets/deities/olympus-original-panel-v2'
 
 
 type LocationResult = {
