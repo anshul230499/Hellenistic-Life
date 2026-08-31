@@ -260,13 +260,96 @@ function wiseGuide(daily:ReturnType<typeof dailyTopics>){
     12:'Some matters mature out of sight. Solitude, hidden pressures, withdrawal, and endings require discrimination about what to release and what to protect.'
   }
 
-  const opening=`Your year is being carried through House ${daily.profectedHouse}, ${daily.profectedSign}, under ${daily.lord}. ${houseCounsel[daily.profectedHouse]}`
+  const opening=`${houseCounsel[daily.profectedHouse]} You do not need to force a conclusion today; notice what keeps asking for your attention and respond to that first.`
   const strength=`Today, ${strongest.name.toLowerCase()} receives the clearest emphasis. ${strongest.summary}`
   const caution=tender.score < 0 ? `The more delicate field is ${tender.name.toLowerCase()}. ${tender.summary}` :
     `No life area is strongly burdened in this simplified testimony today; the quieter field is ${tender.name.toLowerCase()}.`
   const practice=`Do not treat the sky as a command. Use it as a way of noticing timing: give proportionate attention to ${activated.name.toLowerCase()}, then compare the symbolism with what is actually occurring.`
 
   return {opening,strength,caution,practice,strongest,tender}
+}
+
+
+
+type GrowthPattern={
+  id:string
+  title:string
+  reflection:string
+  support:string
+  strength:string
+  technical:string[]
+}
+
+const HOUSE_LAY_CONTEXT:Record<number,string>={
+  1:'your sense of self, confidence, body, and the way you take up space',
+  2:'money, security, possessions, and what helps you feel resourced',
+  3:'communication, learning, siblings, and the rhythm of everyday life',
+  4:'home, family, belonging, and the private foundations beneath everything else',
+  5:'joy, romance, creativity, children, and the part of you that wants to make something',
+  6:'workload, routines, health habits, and the small responsibilities that accumulate',
+  7:'partnership, closeness, conflict, and what other people bring out in you',
+  8:'trust, vulnerability, shared resources, uncertainty, and what cannot be controlled alone',
+  9:'meaning, belief, travel, education, and the need for a larger perspective',
+  10:'work, ambition, visibility, responsibility, and how you want to contribute',
+  11:'friendship, community, belonging, support, and hopes for the future',
+  12:'rest, solitude, hidden pressure, endings, and what needs time away from the noise'
+}
+
+function growthPatterns(chart:ChartData):GrowthPattern[]{
+  const patterns:GrowthPattern[]=[]
+  const get=(name:string)=>chart.planets.find(p=>p.name===name)
+  const technical=(p:PlanetRow)=>[
+    `${p.name} at ${fmtLon(p.longitude)} in ${p.sign}`,
+    `Whole Sign House ${p.house} · ${HOUSE_NAMES[p.house-1]}`,
+    `Motion: ${p.retrograde?'retrograde':'direct'}`,
+    `Domicile ruler of the sign: ${p.ruler}`
+  ]
+
+  for(const p of chart.planets.filter(x=>x.retrograde)){
+    const copy:Record<string,[string,string,string]>={
+      Mercury:['You may need more time to know what you really think.','There can be a habit of replaying conversations, revising decisions, or finding the right words only after the moment has passed. That does not mean your thinking is weak; it often means your mind processes in layers.','Give yourself room to write, revisit, and clarify. When something matters, say the simple version first instead of waiting for the perfect version.'],
+      Venus:['You may be more private about what you value than people realize.','Affection, attraction, and self-worth can become things you examine deeply before you trust them. You may notice yourself comparing what you feel with what you think you should feel.','Let preference be information. Practice naming what feels good, what does not, and what you need without turning every feeling into a verdict on the relationship.'],
+      Mars:['You may hold things in longer than people realize.','You can spend a lot of time deciding when to act, whether anger is justified, or whether your desire is strong enough to follow. Pressure may build internally before it becomes visible.','Respond a little earlier. Movement, direct language, and small decisive actions can keep frustration from having to become an emergency before it gets your attention.'],
+      Jupiter:['You may question your own optimism before you trust it.','Belief, confidence, opportunity, or generosity can become inward questions: “Is this really enough?” or “Am I allowed to want more?” Growth may happen through reflection before it becomes visible.','Notice where you make possibility prove itself too many times. Let evidence matter, but leave some room for hope, mentorship, and experiments that can expand your world.'],
+      Saturn:['You may carry responsibility inwardly, even when no one asked you to.','There can be a private sense that you should already know, already be stronger, or already have things under control. This can produce real endurance, but also unnecessary self-surveillance.','Replace constant self-evaluation with clear agreements: what is actually yours to do, what can wait, and what standard is good enough for today.']
+    }
+    if(copy[p.name]){
+      const [title,reflection,support]=copy[p.name]
+      patterns.push({id:`retro-${p.name}`,title,reflection:`${reflection} This may show up most strongly around ${HOUSE_LAY_CONTEXT[p.house]}.`,support,strength:'What this can become: thoughtful self-knowledge and more intentional choices.',technical:technical(p)})
+    }
+  }
+
+  const saturn=get('Saturn')
+  if(saturn) patterns.push({
+    id:'saturn-theme',
+    title:'You may be harder on yourself here than you need to be.',
+    reflection:`Around ${HOUSE_LAY_CONTEXT[saturn.house]}, you may notice a tendency to measure yourself against an internal standard that is difficult to satisfy. You may take this part of life seriously enough that even ordinary uncertainty can feel like a test.`,
+    support:'Try separating responsibility from self-worth. A difficult season, a delay, or a boundary does not automatically mean you are failing. Build this area slowly enough that your nervous system can believe the progress is real.',
+    strength:'What this can become: patience, reliability, boundaries, and the ability to build something that lasts.',
+    technical:technical(saturn)
+  })
+
+  const moon=get('Moon')
+  if(moon) patterns.push({
+    id:'moon-theme',
+    title:'Your sense of safety may depend on having somewhere to soften.',
+    reflection:`You may be especially sensitive to changes involving ${HOUSE_LAY_CONTEXT[moon.house]}. When that part of life is unsettled, it can be difficult to simply “think your way out of it.”`,
+    support:'Pay attention to what actually settles you rather than what is supposed to. Predictable routines, familiar people, food, sleep, privacy, movement, or a change of environment can sometimes do more than another round of analysis.',
+    strength:'What this can become: emotional intelligence about what restores you and what quietly drains you.',
+    technical:technical(moon)
+  })
+
+  const venus=get('Venus')
+  if(venus) patterns.push({
+    id:'venus-theme',
+    title:'Closeness may work better when you do not abandon your own preferences.',
+    reflection:`In ${HOUSE_LAY_CONTEXT[venus.house]}, harmony may matter to you enough that you sometimes notice the other person’s comfort before your own. The challenge is not to become less caring; it is to stay present in the relationship while still being present with yourself.`,
+    support:'Practice small preferences out loud. “I would rather do this.” “I need a little more time.” “That works for me.” Healthy closeness usually becomes easier when people do not have to guess where you are.',
+    strength:'What this can become: warmth without self-erasure, and a more relaxed ability to receive as well as give.',
+    technical:technical(venus)
+  })
+
+  return patterns.slice(0,6)
 }
 
 
@@ -310,10 +393,10 @@ function forecastForDate(swe:SwissEphemeris,chart:ChartData,birthDate:string,dat
       }
     }
     const level=score>=4?'Very High':score>=2.7?'High':score>=1.4?'Moderate':score>=.55?'Low':'Quiet'
-    const detail=level==='Very High'?`${name} is one of the day's strongest fields. ${reasons.slice(0,2).join(' ')}`:
-      level==='High'?`There is enough converging testimony for a noticeable development in ${name.toLowerCase()}.`:
-      level==='Moderate'?`This sphere is moving, though the testimony is not concentrated enough to promise a major event.`:
-      level==='Low'?`Background activity is present, but it may remain secondary.`:'No major activation stands out in the techniques currently used.'
+    const detail=level==='Very High'?`${name} is one of the day's strongest areas. Give this part of life a little more room; it may ask for attention or produce movement without much prompting.`:
+      level==='High'?`There is enough activity around ${name.toLowerCase()} for something noticeable to develop or become clearer.`:
+      level==='Moderate'?`This part of life is moving, but it may show up as a conversation, decision, mood, or small development rather than a major event.`:
+      level==='Low'?`Some background movement is present, but it does not need to become the center of your day.`:'This part of life looks comparatively quiet right now.'
     return {house,name,level,score,headline:HOUSE_HEADLINES[i],detail}
   })
 }
@@ -333,9 +416,9 @@ function aggregateForecast(swe:SwissEphemeris,chart:ChartData,birthDate:string,d
     const level=score>=4?'Very High':score>=2.7?'High':score>=1.4?'Moderate':score>=.55?'Low':'Quiet'
     const peak=peaks[house]?.date.toLocaleDateString('en-US',{month:'short',day:'numeric'})
     return {house,name,level,score,headline:HOUSE_HEADLINES[i],
-      detail:level==='Very High'||level==='High'?`This is an important sphere during the selected period. The strongest concentration appears around ${peak}.`:
-      level==='Moderate'?`Some movement is likely during this period, with a local peak around ${peak}.`:
-      level==='Low'?`There is background movement, but stronger areas deserve more attention.`:'This sphere is comparatively quiet across the selected period.',
+      detail:level==='Very High'||level==='High'?`This part of life may ask for more attention during the selected period, with the clearest concentration around ${peak}.`:
+      level==='Moderate'?`There may be some movement here, especially around ${peak}, without it needing to become a defining event.`:
+      level==='Low'?`This remains in the background for now; other parts of life may deserve more of your energy.`:'This part of life looks comparatively quiet across the selected period.',
       peak} as SphereForecast
   })
 }
@@ -1283,7 +1366,7 @@ function App(){
             <span className="todayDate">{new Intl.DateTimeFormat('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'}).format(new Date())}</span>
             <h2>The day before you.</h2>
           </div>
-          <div className="yearSeal"><span>YEAR</span><strong>{daily.age}</strong><small>House {daily.profectedHouse} · {daily.lord}</small></div>
+          <div className="yearSeal"><span>CURRENT CHAPTER</span><strong>{daily.age}</strong><small>your age now</small></div>
         </div>
 
         <div className="forecastControls">
@@ -1294,9 +1377,9 @@ function App(){
           <div className="pulseHead"><div><p className="eyebrow">{forecastWindow==='Today'?'WHERE LIFE MAY MOVE TODAY':`IMPORTANT AREAS · NEXT ${forecastWindow.toUpperCase()}`}</p>
           <h3>{forecastWindow==='Today'?'Something can happen here.':'The larger pattern.'}</h3></div><span>Showing strongest first</span></div>
           <div className="pulseRows">{[...sphereForecast].sort((a,b)=>b.score-a.score).slice(0,4).map(f=><article key={f.house}>
-            <div className={`pulseMark l${f.level.replace(' ','').toLowerCase()}`}>{f.house}</div>
-            <div><span>{toRoman(f.house)} · {f.name}</span><strong>{f.level==='Very High'||f.level==='High'?f.headline:f.level==='Moderate'?'Movement is possible here.':'Relatively quiet.'}</strong><p>{f.detail}</p>
-              <details className="predictionWhy"><summary>Why this prediction?</summary>
+            <div className={`pulseMark l${f.level.replace(' ','').toLowerCase()}`}>✦</div>
+            <div><span>{f.name}</span><strong>{f.level==='Very High'||f.level==='High'?f.headline:f.level==='Moderate'?'Movement is possible here.':'Relatively quiet.'}</strong><p>{f.detail}</p>
+              <details className="predictionWhy"><summary>See the astrology behind this</summary>
                 <div className="evidenceStack">
                   <p><b>Annual timing:</b> {((ageOnDate(date,new Date())%12)+1)===f.house?`This is your profected house for the year, so events here receive priority.`:`House ${f.house} is not the annual profected house, so it needs stronger transit testimony to become prominent.`}</p>
                   {evidenceForHouse(transitEvidence,f.house).map((e,i)=><div className="evidenceLine" key={`${e.transit}-${i}`}>
@@ -1320,8 +1403,8 @@ function App(){
             <p className="eyebrow">{questionResult.label.toUpperCase()} · NEXT 90 DAYS</p>
             <h4>The strongest windows for movement or clarity</h4>
             <div className="windowLine">{questionResult.windows.map((w,i)=><div key={w.date} className={i===0?'strongest':''}><span>{w.date}</span><b>{i===0?'strongest':'watch'}</b></div>)}</div>
-            <p>The astrology is most concentrated around <strong>{questionResult.windows[0]?.date}</strong>. For this question the guide is watching Houses {questionResult.houses.join(', ')} together. This is stronger as a timing signal for <em>movement, information, or clarification</em> than as a guarantee of a particular legal or practical outcome.</p>
-            <details className="questionWhy"><summary>Why these houses and dates?</summary>
+            <p>The period around <strong>{questionResult.windows[0]?.date}</strong> carries the clearest concentration of movement in the areas connected with your question. Treat it as a window for <em>movement, information, or clarification</em>, not as a guarantee of a particular outcome.</p>
+            <details className="questionWhy"><summary>See how this window was calculated</summary>
               <p>Question type selects the relevant topical houses; the engine scans 90 days for annual-profection emphasis and concentrations of traditional planetary testimony in those places.</p>
               <div className="questionHouses">{questionResult.houses.map(h=><span key={h}>{toRoman(h)} · {HOUSE_NAMES[h-1]}</span>)}</div>
               <p><b>Transit logic:</b> the guide looks for the seven traditional planets moving through these houses and for contacts to the current Lord of the Year. The next engine revision will add solar-return confirmation and more rigorous time-lord weighting.</p>
@@ -1354,13 +1437,14 @@ function App(){
           </section>
         </section>
 
-        <section className="transitsNow">
-          <div className="transitHead"><div><p className="eyebrow">TRANSITS TODAY</p><h3>What the seven wanderers are doing now</h3></div><span>Tap the reasoning above to see which transit matters to each prediction.</span></div>
+        <details className="transitsNow technicalDrawer">
+          <summary><span>See today’s planetary data</span><small>positions, houses, motion and close natal contacts</small></summary>
+          <div className="transitHead"><div><p className="eyebrow">TRANSITS TODAY</p><h3>What the seven wanderers are doing now</h3></div><span>Technical layer</span></div>
           <div className="transitStrip">{transitEvidence.map(e=><article key={e.transit}>
             <span>{e.glyph}</span><div><strong>{e.transit}</strong><small>{fmtLon(e.longitude)} · House {e.house}</small>
             <em>{e.target&&e.aspect?`${e.phase} ${e.aspect} natal ${e.target} · ${e.orb?.toFixed(2)}°`:`${e.motion} · no close major natal aspect`}</em></div>
           </article>)}</div>
-        </section>
+        </details>
 
         <div className="dailyCompass">
           <article><span>SEE</span><h3>{guide.strongest.name}</h3><p>{guide.strength}</p></article>
@@ -1368,7 +1452,7 @@ function App(){
           <article><span>REFRAIN</span><h3>{guide.tender.name}</h3><p>{guide.caution}</p></article>
         </div>
 
-        <details className="whyPanel"><summary>Why is the guide saying this?</summary>
+        <details className="whyPanel"><summary>See the astrology behind today’s guidance</summary>
           <div className="methodNotes">
             <span>1 · At age {daily.age}, annual profection activates House {daily.profectedHouse}.</span>
             <span>2 · {daily.profectedSign} therefore becomes the annual sign, ruled by {daily.lord}.</span>
@@ -1381,24 +1465,48 @@ function App(){
       </section>}
 
 
+      {chart&&growthPatterns(chart).length>0&&<section className="growthSection">
+        <div className="sectionHead growthHead"><div>
+          <p className="eyebrow">WORKING WITH YOUR CHART</p>
+          <h2>Patterns that may feel familiar.</h2>
+          <p className="note">This part is intentionally written in everyday language. Take what feels recognizable, leave what does not, and use the suggestions as prompts for reflection rather than diagnoses or rules.</p>
+        </div></div>
+        <div className="growthGrid">{growthPatterns(chart).map((pattern,i)=><article className="growthCard" key={pattern.id}>
+          <div className="growthNumber">{String(i+1).padStart(2,'0')}</div>
+          <div className="growthCopy">
+            <h3>{pattern.title}</h3>
+            <p>{pattern.reflection}</p>
+            <div className="whatHelps"><span>WHAT MAY HELP</span><p>{pattern.support}</p></div>
+            <p className="growthStrength">{pattern.strength}</p>
+            <details className="growthWhy"><summary>See why this pattern appears in the chart</summary>
+              <ul>{pattern.technical.map(x=><li key={x}>{x}</li>)}</ul>
+            </details>
+          </div>
+        </article>)}</div>
+      </section>}
+
+
       {chapters.length>0&&<section className="majorChapters">
         <div className="chaptersHeader">
           <div>
             <p className="eyebrow">THE GREATER TIMELINE</p>
             <h2>Major chapters of life</h2>
-            <p className="chaptersIntro">This scan looks for years when several traditional timing indicators converge. It highlights periods with unusually concentrated testimony — not guaranteed events — and shows the astrological evidence behind every window.</p>
+            <p className="chaptersIntro">Some periods of life carry more pressure, possibility, or momentum than others. This timeline looks for those concentrated windows and describes what they may feel like in ordinary life. Nothing here is a guaranteed event.</p>
           </div>
           <div className="chapterScopeTabs" aria-label="Timeline period">
             {(['Future','Past','All'] as ChapterScope[]).map(scope=><button type="button" key={scope} className={chapterScope===scope?'active':''} onClick={()=>setChapterScope(scope)}>{scope}</button>)}
           </div>
         </div>
 
-        <div className="chapterMethodRibbon">
-          <span><b>01</b> Annual profection</span>
-          <span><b>02</b> Lord of the Year</span>
-          <span><b>03</b> Jupiter / Saturn cycles</span>
-          <span><b>04</b> House-ruler + angle contacts</span>
-        </div>
+        <details className="chapterMethod technicalDrawer">
+          <summary><span>See how the timeline is calculated</span><small>traditional timing methods and corroborating signals</small></summary>
+          <div className="chapterMethodRibbon">
+            <span><b>01</b> Annual profection</span>
+            <span><b>02</b> Lord of the Year</span>
+            <span><b>03</b> Jupiter / Saturn cycles</span>
+            <span><b>04</b> House-ruler + angle contacts</span>
+          </div>
+        </details>
 
         <div className="chapterTimeline">
           {visibleChapters.map((chapter,i)=><details className={`chapterCard ${chapter.status.toLowerCase()} strength-${chapter.strength.toLowerCase().replace(' ','-')}`} key={chapter.id} open={i===0&&chapterScope!=='Past'}>
@@ -1408,11 +1516,11 @@ function App(){
                 <span className="chapterIcon">{chapter.icon}</span>
                 <div><p className="eyebrow">{chapter.window.toUpperCase()}</p><h3>{chapter.area}</h3><p>{chapter.manifestations.slice(0,3).join(' · ')}</p></div>
               </div>
-              <div className="chapterStrength"><span>{chapter.strength}</span><div className="strengthTrack"><i style={{width:`${Math.min(100,Math.round(chapter.score/7.4*100))}%`}}></i></div><small>{chapter.indicators.length} converging testimonies</small></div>
+              <div className="chapterStrength"><span>{chapter.strength}</span><div className="strengthTrack"><i style={{width:`${Math.min(100,Math.round(chapter.score/7.4*100))}%`}}></i></div><small>multiple signals agree</small></div>
             </summary>
             <div className="chapterDetails">
               <div className="chapterPossibilities"><p className="eyebrow">POSSIBLE MANIFESTATIONS</p><div>{chapter.manifestations.map(x=><span key={x}>{x}</span>)}</div></div>
-              <div className="chapterEvidence"><p className="eyebrow">WHY THIS WINDOW RANKS HIGH</p>{chapter.indicators.map((e,j)=><article key={`${e.label}-${j}`}><b>{String(j+1).padStart(2,'0')}</b><div><strong>{e.label}</strong><p>{e.detail}</p></div></article>)}</div>
+              <details className="chapterEvidence technicalDrawer"><summary><span>See why this period stands out</span><small>the astrology behind the timing</small></summary><div><p className="eyebrow">WHY THIS WINDOW RANKS HIGH</p>{chapter.indicators.map((e,j)=><article key={`${e.label}-${j}`}><b>{String(j+1).padStart(2,'0')}</b><div><strong>{e.label}</strong><p>{e.detail}</p></div></article>)}</div></details>
               <p className="chapterCaveat">A high score means several symbolic timing techniques are active together. It does not mean every listed manifestation will occur, nor does it replace practical judgment about relationships, money, work, immigration, health, or other consequential decisions.</p>
             </div>
           </details>)}
@@ -1422,15 +1530,15 @@ function App(){
         <div className="chapterFooter">
           <div><span>PAST WINDOWS</span><strong>{chapters.filter(c=>c.status==='Past').length}</strong><small>use these to compare the model with real milestones</small></div>
           <div><span>FUTURE WINDOWS</span><strong>{chapters.filter(c=>c.status!=='Past').length}</strong><small>ranked by converging testimony</small></div>
-          <p><b>Current engine:</b> annual profections, Lord of the Year, traditional-planet transits, angle contacts, house rulers, and Jupiter/Saturn developmental cycles. Zodiacal Releasing and solar-return confirmation can be added as separate corroborating layers rather than being simulated.</p>
+          <p>Use past windows as a reality check: if the dates do not resemble meaningful chapters in your actual life, give the future windows less weight. The technical methods remain available inside each card.</p>
         </div>
       </section>}
 
       {guidingTransit && PLANET_GUIDES[guidingTransit.transit] && <section className="devotionalToday">
         <div className="devotionalIntro">
           <p className="eyebrow">A PRESENCE FOR TODAY</p>
-          <h2>{guidingTransit.glyph} {guidingTransit.transit} is your guiding planetary principle today.</h2>
-          <p>{guidingTransit.relevance} {guidingTransit.target&&guidingTransit.aspect?`${guidingTransit.phase} ${guidingTransit.aspect.toLowerCase()} to natal ${guidingTransit.target} brings this principle closer to the foreground.`:''}</p>
+          <h2>A symbolic companion for the mood of the day.</h2>
+          <p>Choose the tradition that speaks to you. The figure below is offered as a way to contemplate a quality that may be useful today, not as a prescription about what you should believe or practice.</p>
           <div className="traditionTabs">{(['Hindu','Greek','Roman'] as DevotionalTradition[]).map(t=><button type="button" key={t} onClick={()=>setDevotionalTradition(t)} className={devotionalTradition===t?'active':''}>{t}</button>)}</div>
         </div>
         <div className="deityFeature">
@@ -1441,23 +1549,23 @@ function App(){
             <p className="eyebrow">THROUGH THE {devotionalTradition.toUpperCase()} TRADITION</p>
             <h3>{PLANET_GUIDES[guidingTransit.transit][devotionalTradition].name}</h3>
             <p className="deityThemes">{PLANET_GUIDES[guidingTransit.transit][devotionalTradition].theme}</p>
-            <p>Seek this figure or planetary principle symbolically today where you need steadiness, discernment, or perspective. The traditions are presented distinctly rather than as interchangeable names for one deity.</p>
+            <p>Consider what this figure represents psychologically: where could a little more steadiness, perspective, courage, patience, tenderness, or discernment help you meet the day more cleanly?</p>
             <blockquote>May I meet this day with the clearest expression of {guidingTransit.transit.toLowerCase()}: neither excess nor avoidance, but the right measure.</blockquote>
             <small>Hellenistic Life reflection · not a traditional prayer or mantra.</small>
-            <a className="artSourceLink" href={deitySourceLink(guidingTransit.transit,devotionalTradition)} target="_blank" rel="noreferrer">Artwork source & rights ↗</a>
+            <details className="deityDepth technicalDrawer"><summary><span>Explore the symbolism and astrology</span><small>why this figure appears today</small></summary><div><p><b>Planetary principle:</b> {guidingTransit.glyph} {guidingTransit.transit}</p><p>{guidingTransit.relevance} {guidingTransit.target&&guidingTransit.aspect?`${guidingTransit.phase} ${guidingTransit.aspect.toLowerCase()} to natal ${guidingTransit.target}${guidingTransit.orb!==undefined?` · ${guidingTransit.orb.toFixed(2)}°`:''}.`:''}</p><a className="artSourceLink" href={deitySourceLink(guidingTransit.transit,devotionalTradition)} target="_blank" rel="noreferrer">Artwork source & rights ↗</a></div></details>
           </div>
         </div>
       </section>}
 
       {chart && <section className="natalDevotion">
         <div className="sectionHead"><div><p className="eyebrow">NATAL GUIDANCE BY HOUSE</p><h2>Who presides over each sphere of your life?</h2>
-        <p className="note">Each Whole Sign house is linked to its natal sign ruler. Choose a tradition to see the corresponding planetary deity or divine figure associated with that ruler.</p></div>
+        <p className="note">Each part of life is paired with a symbolic figure from the tradition you choose. Start with the human theme; open a card only if you want to see the astrological correspondence behind it.</p></div>
         <div className="traditionTabs compact">{(['Hindu','Greek','Roman'] as DevotionalTradition[]).map(t=><button type="button" key={t} onClick={()=>setDevotionalTradition(t)} className={devotionalTradition===t?'active':''}>{t}</button>)}</div></div>
         <div className="natalGuideGrid">{Array.from({length:12},(_,i)=>{
           const g=natalGuideForHouse(chart,i+1), d=g.guide[devotionalTradition]
           return <article key={i}>
             <img src={d.image} loading="lazy" onError={e=>deityImageFallback(e,g.ruler)} alt={`${d.name}, guide for House ${i+1}`}/>
-            <div><span>{toRoman(i+1)} · {HOUSE_NAMES[i]}</span><h3>{d.name}</h3><small>{g.sign} · ruled by {g.ruler}</small><p>{d.theme}</p><a className="artSourceLink small" href={deitySourceLink(g.ruler,devotionalTradition)} target="_blank" rel="noreferrer">Source / rights ↗</a></div>
+            <div><span>{HOUSE_NAMES[i]}</span><h3>{d.name}</h3><p>{d.theme}</p><details className="deityCardDepth"><summary>Explore the symbolism</summary><small>House {i+1} · {g.sign} · ruled by {g.ruler}</small><a className="artSourceLink small" href={deitySourceLink(g.ruler,devotionalTradition)} target="_blank" rel="noreferrer">Source / rights ↗</a></details></div>
           </article>
         })}</div>
       </section>}
@@ -1474,6 +1582,9 @@ function App(){
         <div className="transitPlacements"><div><p className="eyebrow">NATAL PLACEMENTS</p>{chart.planets.map(p=><span key={p.name}>{p.glyph} {p.name} · {fmtLon(p.longitude)}</span>)}</div><div><p className="eyebrow">TRANSITS · {wheelDate}</p>{wheelTransits.map(p=><span key={p.name}>{p.glyph} {p.name} · {fmtLon(p.longitude)} · H{p.house}</span>)}</div></div>
       </section>
 
+      <details className="technicalArchive">
+        <summary><div><span>Explore the chart in depth</span><small>birth-time conversion, placements, houses, aspects and calculation inspector</small></div></summary>
+        <div className="technicalArchiveBody">
       <section className="timelineCalc">
         <div className="timelineTitle"><p className="eyebrow">TIME RESOLUTION</p><h2>Local birth time → Universal Time</h2></div>
         <div className="timeFlow">
@@ -1536,6 +1647,8 @@ function App(){
         <p className="note">Whole-sign configurations remain visible independently of the degree-orb slider.</p>
         <div className="aspectGrid">{chart.aspects.map((a,i)=><article key={i}><strong>{a.a} — {a.b}</strong><span>{a.aspect}</span><small>{a.separation.toFixed(2)}° · {a.wholeSign?'whole-sign configured':'degree-orb only'}</small></article>)}</div>
       </section>
+        </div>
+      </details>
     </>}
 
     <section className="credits">
