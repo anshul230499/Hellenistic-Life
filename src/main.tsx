@@ -299,7 +299,7 @@ function growthPatterns(chart:ChartData):GrowthPattern[]{
   const patterns:GrowthPattern[]=[]
   const get=(name:string)=>chart.planets.find(p=>p.name===name)
   const technical=(p:PlanetRow)=>[
-    `${p.name} at ${fmtLon(p.longitude)} in ${p.sign}`,
+    `${p.name} · ${fmtLon(p.longitude)}`,
     `Whole Sign House ${p.house} · ${HOUSE_NAMES[p.house-1]}`,
     `Motion: ${p.retrograde?'retrograde':'direct'}`,
     `Domicile ruler of the sign: ${p.ruler}`
